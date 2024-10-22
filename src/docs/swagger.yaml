@@ -1,0 +1,247 @@
+definitions:
+  gin.H:
+    additionalProperties: {}
+    type: object
+  order-matching_api_dto.CancelOrderRequest:
+    properties:
+      market:
+        type: string
+      order_id:
+        type: string
+    required:
+    - market
+    - order_id
+    type: object
+  order-matching_api_dto.GetOrderBookRequest:
+    properties:
+      market:
+        type: string
+    required:
+    - market
+    type: object
+  order-matching_api_dto.GetOrderRequest:
+    properties:
+      market:
+        type: string
+      order_id:
+        type: string
+    required:
+    - market
+    - order_id
+    type: object
+  order-matching_api_dto.OrderRequest:
+    properties:
+      amount:
+        type: number
+      market:
+        type: string
+      order_id:
+        type: string
+      order_kind:
+        type: string
+      order_type:
+        type: string
+      price:
+        type: number
+    required:
+    - amount
+    - market
+    - order_id
+    - order_kind
+    - order_type
+    type: object
+  order-matching_api_helper.BaseHttpResponse:
+    properties:
+      error: {}
+      result: {}
+      resultCode:
+        $ref: '#/definitions/order-matching_api_helper.ResultCode'
+      success:
+        type: boolean
+      validationErrors:
+        items:
+          $ref: '#/definitions/order-matching_api_validation.ValidationError'
+        type: array
+    type: object
+  order-matching_api_helper.ResultCode:
+    enum:
+    - 200
+    - 400
+    - 401
+    - 403
+    - 404
+    - 429
+    - 42901
+    - 500
+    - 500
+    type: integer
+    x-enum-comments:
+      AuthError: Authentication error
+      CustomRecovery: Custom recovery error
+      ForbiddenError: Access forbidden
+      InternalError: Internal server error
+      LimiterError: Too many requests (rate limit)
+      NotFoundError: Resource not found
+      OtpLimiterError: Too many OTP requests (rate limit for OTP)
+      Success: Request successful
+      ValidationError: Validation error
+    x-enum-varnames:
+    - Success
+    - ValidationError
+    - AuthError
+    - ForbiddenError
+    - NotFoundError
+    - LimiterError
+    - OtpLimiterError
+    - CustomRecovery
+    - InternalError
+  order-matching_api_validation.ValidationError:
+    properties:
+      message:
+        type: string
+      property:
+        type: string
+      tag:
+        type: string
+      value:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /v1/health/:
+    get:
+      consumes:
+      - application/json
+      description: Health Check
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/order-matching_api_helper.BaseHttpResponse'
+        "400":
+          description: Failed
+          schema:
+            $ref: '#/definitions/order-matching_api_helper.BaseHttpResponse'
+      summary: Health Check
+      tags:
+      - Health
+  /v1/orders/cancel-order:
+    post:
+      consumes:
+      - application/json
+      description: Cancel an order by its ID and market
+      parameters:
+      - description: CancelOrderRequest
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/order-matching_api_dto.CancelOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order canceled successfully
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Market or Order not found
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Cancel an order
+      tags:
+      - Orders
+  /v1/orders/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new order of type limit or market
+      parameters:
+      - description: OrderRequest
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/order-matching_api_dto.OrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order processed successfully
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid input or processing error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Create an order
+      tags:
+      - Orders
+  /v1/orders/get-order:
+    post:
+      consumes:
+      - application/json
+      description: Retrieve order details by its ID and market
+      parameters:
+      - description: GetOrderRequest
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/order-matching_api_dto.GetOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order Find
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Market or Order not found
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get an order by ID
+      tags:
+      - Orders
+  /v1/orders/orderbook:
+    post:
+      consumes:
+      - application/json
+      description: Retrieve the depth of the order book for a specific market
+      parameters:
+      - description: GetOrderBookRequest
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/order-matching_api_dto.GetOrderBookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OrderBook depth retrieved
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Market not found
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get order book depth
+      tags:
+      - Orders
+swagger: "2.0"

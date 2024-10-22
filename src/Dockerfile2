@@ -1,0 +1,33 @@
+FROM golang:1.23 AS builder
+
+WORKDIR /app
+
+COPY go.* ./
+RUN go mod download
+
+COPY . ./
+
+RUN go build -v -o server ./cmd/main.go
+
+# FROM debian:buster-slim 
+# RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive \
+#     rm -rf /var/lib/apt/lists/*
+
+   # مرحله دوم: ساخت تصویر نهایی
+FROM debian:bookworm-slim
+
+# نصب وابستگی‌ها
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/server /app/server
+COPY --from=builder /app/config/config-docker.yml /app/config/config-docker.yml
+COPY --from=builder /app/docs /app/docs
+
+ENV APP_ENV=production
+ENV PORT ${Port}
+
+CMD [ "/app/server" ]
+ 
