@@ -114,12 +114,12 @@ func RegisterSwagger(r *gin.Engine, cfg *config.Config) {
 	docs.SwaggerInfo.Description = "This is the API documentation for the Order Matcher Microservice. The microservice handles matching market and limit orders for various torder-matchingg pairs."
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.BasePath = "/api"
-	// docs.SwaggerInfo.Host = fmt.Sprintf("matchmaking.liara.run:%s", cfg.Server.ExternalPort)
-	docs.SwaggerInfo.Host = "matchmaking.liara.run"
-	docs.SwaggerInfo.Schemes = []string{"https"}
+	docs.SwaggerInfo.Host = fmt.Sprintf("localhost:%s", cfg.Server.ExternalPort)
+	docs.SwaggerInfo.Schemes = []string{"http"}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
+
 
 func RegisterPrometheus() {
 	err := prometheus.Register(metrics.DbCall)

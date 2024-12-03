@@ -198,39 +198,39 @@ services:
       - webapi_network
     restart: always
   
-  order-maching:
-    build: ../src/
-    image: order-maching:latest
-    container_name: order-maching
-    environment:
-      - PORT=9003
-    ports:
-      - 9003:5000
-    networks:
-      - webapi_network
-    volumes:
-      - logs:/app/logs
-    depends_on:
-      - postgres
-      - elasticsearch
-    restart: unless-stopped
+  # order-maching:
+  #   build: ../src/
+  #   image: order-maching:latest
+  #   container_name: order-maching
+  #   environment:
+  #     - PORT=9003
+  #   ports:
+  #     - 9003:5000
+  #   networks:
+  #     - webapi_network
+  #   volumes:
+  #     - logs:/app/logs
+  #   depends_on:
+  #     - postgres
+  #     - elasticsearch
+  #   restart: unless-stopped
 
 
-  order-maching-hub:
-    image: kiarashshams/order-matching:1.0.3
-    container_name: order-maching
-    environment:
-      - PORT=9003
-    ports:
-      - 9003:5000
-    networks:
-      - webapi_network
-    volumes:
-      - logs:/app/logs
-    depends_on:
-      - postgres
-      - elasticsearch
-    restart: unless-stopped
+  # order-maching-hub:
+  #   image: kiarashshams/order-matching:1.0.3
+  #   container_name: order-maching
+  #   environment:
+  #     - PORT=9003
+  #   ports:
+  #     - 9003:5000
+  #   networks:
+  #     - webapi_network
+  #   volumes:
+  #     - logs:/app/logs
+  #   depends_on:
+  #     - postgres
+  #     - elasticsearch
+  #   restart: unless-stopped
   
 ####################### VOLUME AND NETWORKS #######################
 volumes:

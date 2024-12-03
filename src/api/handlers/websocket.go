@@ -19,10 +19,13 @@ var validIntervals = map[string]time.Duration{
 }
 
 var upgrader = websocket.Upgrader{
+    ReadBufferSize:  1024,
+    WriteBufferSize: 1024,
     CheckOrigin: func(r *http.Request) bool {
         return true
     },
 }
+
 
 
 func GetOrderBookWS(c *gin.Context) {
@@ -53,6 +56,7 @@ func GetOrderBookWS(c *gin.Context) {
 
     // Loop to send order book data
     for {
+        
         depth := orderBook.Depth()
         err := conn.WriteJSON(gin.H{
             "market": market,

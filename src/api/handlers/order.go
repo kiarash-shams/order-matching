@@ -201,6 +201,7 @@ func GetOrderBook(c *gin.Context) {
 
 	// Check if the market exists in the orderBook
 	orderBook, exists := markets[req.Market]
+	
 	if !exists {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Market not found"})
 		return
