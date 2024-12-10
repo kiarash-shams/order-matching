@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"order-matching/matchingo"
 	"order-matching/pkg/logging"
+	"order-matching/pkg/metrics"
 )
 
 // var logger = logging.NewLogger(config.GetConfig())
@@ -18,6 +19,7 @@ var markets = map[string]*matchingo.OrderBook{
 	"BTCUSDT": matchingo.NewOrderBook(),
 	"ETHUSDT": matchingo.NewOrderBook(),
 }
+
 
 
 // CreateOrder godoc
@@ -58,11 +60,15 @@ func CreateOrder(c *gin.Context,) {
 		if req.OrderType == "buy" {
 			order = matchingo.NewLimitOrder(req.OrderID, matchingo.Buy, matchingo.FromFloat(req.Amount), matchingo.FromFloat(req.Price), "", "")
 			logger.Info(logging.Orderbook, logging.NewLimitOrder, "New LimitOrder Buy", nil)
+			metrics.NewOrder.WithLabelValues( "New LimitOrder Buy", "Success").Inc()
 		} else if req.OrderType == "sell" {
 			order = matchingo.NewLimitOrder(req.OrderID, matchingo.Sell, matchingo.FromFloat(req.Amount), matchingo.FromFloat(req.Price), "", "")
 			logger.Info(logging.Orderbook, logging.NewLimitOrder, "New LimitOrder Sell", nil)
+			metrics.NewOrder.WithLabelValues( "New LimitOrder Sell", "Success").Inc()
+			
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order type"})
+			metrics.NewOrder.WithLabelValues( "New Limit Order", "Failed").Inc()
 			return
 		}
 
@@ -70,12 +76,14 @@ func CreateOrder(c *gin.Context,) {
 		if req.OrderType == "buy" {
 			order = matchingo.NewMarketOrder(req.OrderID, matchingo.Buy, matchingo.FromFloat(req.Amount))
 			logger.Info(logging.Orderbook, logging.NewMarketOrder, "New MarketOrder Buy", nil)
-			
+			metrics.NewOrder.WithLabelValues( "New MarketOrder Buy", "Success").Inc()
 		} else if req.OrderType == "sell" {
 			order = matchingo.NewMarketOrder(req.OrderID, matchingo.Sell, matchingo.FromFloat(req.Amount))	
 			logger.Info(logging.Orderbook, logging.NewMarketOrder, "New MarketOrder Sell", nil)
+			metrics.NewOrder.WithLabelValues( "New MarketOrder Sell", "Success").Inc()
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order type"})
+			metrics.NewOrder.WithLabelValues( "New Market Order", "Failed").Inc()
 			return
 		}
 	default:
@@ -91,6 +99,7 @@ func CreateOrder(c *gin.Context,) {
 		return}
 	
 	logger.Info(logging.Orderbook, logging.Process, "Process Orderbook Success", nil)
+	metrics.ProcessedOrder.WithLabelValues("Process Orderbook", "Success").Inc()
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Order processed successfully",
@@ -212,5 +221,5 @@ func GetOrderBook(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": fmt.Sprintf("OrderBook %s live", req.Market),
 		"depth":   orderBook.Depth(),
-	})
+	})	
 }

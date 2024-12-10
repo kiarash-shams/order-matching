@@ -56,7 +56,7 @@ const (
 	OrderPriceAdjustment SubCategory = "OrderPriceAdjustment" // Log when an order price is adjusted
 	NewLimitOrder 		 SubCategory = "NewLimitOrder" // Log when an order price is adjusted
 	NewMarketOrder 	 	 SubCategory = "NewMarketOrder" // Log when an order price is adjusted
-	GetOrderId 	 	 SubCategory = "GetOrderId" // Log when an order price is adjusted
+	GetOrderId 	 	 	 SubCategory = "GetOrderId" // Log when an order price is adjusted
 	ListOrderBook 	 	 SubCategory = "ListOrderBook" // Log when an order price is adjusted
 
 	// WebSocket

@@ -108,6 +108,8 @@ func NewLimitOrder(orderID string, side Side, quantity, price fpdecimal.Decimal,
 		panic(ErrInvalidPrice)
 	}
 
+	
+
 	if tif != "" && tif != GTC && tif != FOK && tif != IOC {
 		panic(ErrInvalidTif)
 	}

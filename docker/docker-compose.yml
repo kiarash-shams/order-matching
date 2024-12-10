@@ -1,6 +1,30 @@
 version: '3.7'
 
 services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9094:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9094
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_CREATE_TOPICS: "test-topic:1:1"
+    depends_on:
+      - zookeeper
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
   ####################### SETUP #######################
   setup:
     build:
@@ -74,6 +98,7 @@ services:
     volumes:
       - ./elk/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - ../src/logs:/var/log/filebeat/service:ro
+      #- ../prod/logs:/var/log/filebeat/service:ro
       - logs:/var/log/filebeat
       - logs:/app:ro
 
@@ -84,53 +109,6 @@ services:
       - webapi_network
     depends_on:
       - elasticsearch
-
-  ####################### POSTGRES #######################
-  postgres:
-    image: postgres
-    container_name: postgres_container
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: car_sale_db
-      PGDATA: /data/postgres
-    volumes:
-      - postgres:/data/postgres
-    ports:
-      - "5432:5432"
-    networks:
-      - webapi_network
-    restart: unless-stopped
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin_container
-    environment:
-      PGADMIN_DEFAULT_EMAIL: h.naimaei@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: 123456
-    volumes:
-      - pgadmin:/var/lib/pgadmin
-    ports:
-      - "8090:80"
-    networks:
-      - webapi_network
-    restart: unless-stopped
-    depends_on:
-      - postgres
-
-  ####################### REDIS #######################
-  redis:
-    image: redis:latest
-    container_name: redis_container
-    command: [ "redis-server", "/etc/redis/redis.conf" ]
-    volumes:
-      - ./redis/redis.conf:/etc/redis/redis.conf
-      - redis:/etc/redis
-    ports:
-      - "6379:6379"
-    networks:
-      - webapi_network
-
   ##################### Monitoring #################
   prometheus:
     image: prom/prometheus:latest
@@ -197,11 +175,11 @@ services:
     networks:
       - webapi_network
     restart: always
-  
+
   # order-maching:
   #   build: ../src/
   #   image: order-maching:latest
-  #   container_name: order-maching
+  #   container_name: web-api1
   #   environment:
   #     - PORT=9003
   #   ports:
@@ -211,32 +189,10 @@ services:
   #   volumes:
   #     - logs:/app/logs
   #   depends_on:
-  #     - postgres
   #     - elasticsearch
   #   restart: unless-stopped
-
-
-  # order-maching-hub:
-  #   image: kiarashshams/order-matching:1.0.3
-  #   container_name: order-maching
-  #   environment:
-  #     - PORT=9003
-  #   ports:
-  #     - 9003:5000
-  #   networks:
-  #     - webapi_network
-  #   volumes:
-  #     - logs:/app/logs
-  #   depends_on:
-  #     - postgres
-  #     - elasticsearch
-  #   restart: unless-stopped
-  
 ####################### VOLUME AND NETWORKS #######################
 volumes:
-  postgres:
-  pgadmin:
-  redis:
   logs:
   setup:
   elasticsearch:

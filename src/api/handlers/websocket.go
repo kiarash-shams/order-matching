@@ -54,6 +54,21 @@ func GetOrderBookWS(c *gin.Context) {
         return
     }
 
+     // Create a channel to stop the loop when connection is closed
+     done := make(chan struct{})
+
+     // Goroutine to listen for close events
+     go func() {
+         for {
+             _, _, err := conn.ReadMessage()
+             if err != nil {
+                 fmt.Println("Connection closed:", err)
+                 close(done)
+                 return
+             }
+         }
+     }()
+
     // Loop to send order book data
     for {
         
